@@ -3,8 +3,8 @@ import PySimpleGUI as sg
 import random
 import time
 import pandas as pd #save responses to .CSV file
-import cryptography #encrypt the .CSV file - hasn't done yet
-import pandas._libs.tslibs.base
+import cryptography #encrypt the .CSV file
+import pandas._libs.tslibs.base #necessary to generate working .exe file
 
 response_dict = {}
 recall_dict = {}
@@ -29,7 +29,7 @@ def demographics():
                 [sg.Radio("1", "languages"), sg.Radio("2", "languages"), sg.Radio("3+", "languages")],
                 [sg.Text("Degree of education")],
                 [sg.Radio("High school", "education"), sg.Radio("Bachelor's Degree", "education"), sg.Radio("Master's Degree", "education"), sg.Radio("PhD", "education")],
-                [sg.Text("Do you have classes in English?")],
+                [sg.Text("Did you have classes in English?")],
                 [sg.Radio("Yes", "eng_class"), sg.Radio("No", "eng_class")],
                 [sg.Text("How many hours a day do you use the computer?")],
                 [sg.InputText(size = 10)], #sg.Radio("1-3", "comp_usage"), sg.Radio("4-6", "comp_usage"), sg.Radio("7+", "comp_usage")
@@ -41,9 +41,17 @@ def demographics():
     window = sg.Window("Demographics", layout, finalize = True)
     while True:
         event, values = window.read()
+
         if event == "Submit":
-            get_values(values)
-            break        
+            if values[0] == "" or values[1] == "" or values[2] == "" or True not in (values[3], values[4], values[5]) or True not in (values[6], values[7]) or True not in (values[8], values[9], values[10]) or True not in (values[11], values[12], values[13], values[14]) or True not in (values[15], values[16]) or values[17] == "" or True not in (values[18], values[19]):
+                sg.Popup("Please answer all questions.", title = "Warning")
+            else:
+                get_values(values)
+                break
+
+        if event == sg.WIN_CLOSED:
+            sg.Popup("Your answers are not saved. Thank you for your time.", title = "Good Bye")
+            break
 
     window.close()
 
@@ -102,8 +110,8 @@ def experiment_set(color = "default"):
 
     width, height = sg.Window.get_screen_size()
     
-    layout = [[sg.Text("", text_color=color, font = ("default", 24), pad = ((0, 0), (height / 2 -24, 0)), background_color="white", key="text")]] #, pad = ((730, 750), (420, 420)), , justification = "center"
-    window = sg.Window("", layout, no_titlebar = True, background_color="white", location = (0, 0), element_justification = "c", finalize = True) #keep_on_top = True, 
+    layout = [[sg.Text("", text_color=color, font = ("default", 24), pad = ((0, 0), (height / 2 -24, 0)), background_color = "white", key="text")]]
+    window = sg.Window("", layout, no_titlebar = True, background_color="white", location = (0, 0), element_justification = "center", force_toplevel = True, modal = True, keep_on_top = True, finalize = True) 
     window.Maximize()
     
     turns = 20
@@ -142,27 +150,33 @@ def recall_responses(color = "default"):
     while True:
         event, values = window.read()
         if event == "Save Answers":
+            sg.Popup("Your answers are saved.", title = "Info")
             recall_values(color, values)
             break
+        if event == sg.WIN_CLOSED:
+            break
+
     window.close()
 
-def recall_values(color, values):    
-    recall_dict[f"{color}"] = values[0]
+def recall_values(color, values):
+    recall_dict[f"{color}"] = values[0] # color : response pair
 
-def write_to_file():
+def write_to_file(): # may be modified for encryption
     df = pd.DataFrame([response_dict])
     df2 = pd.concat([df, pd.DataFrame([recall_dict])], axis = 1)
     df2.to_csv("{name}.csv".format(name = response_dict["Name"]), index=False) # , compression = "zip"
 
 demographics()
 
-experiment_set()
-recall_responses()
-
-experiment_set("green")
-recall_responses("green")
-
-experiment_set("red")
-recall_responses("red")
-
-write_to_file()
+#if demographics not completed, don't start the experiment
+if response_dict != {}:
+    experiment_set()
+    recall_responses()
+    
+    experiment_set("green")
+    recall_responses("green")
+    
+    experiment_set("red")
+    recall_responses("red")
+    
+    write_to_file()
