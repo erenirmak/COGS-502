@@ -3,9 +3,10 @@ import PySimpleGUI as sg
 import random
 import time
 import pandas as pd #save responses to .CSV file
-import cryptography #encrypt the .CSV file
+import cryptography #encrypt the .CSV file - hasn't done yet
+import pandas._libs.tslibs.base
 
-response_dict ={}
+response_dict = {}
 recall_dict = {}
 
 def demographics():
@@ -121,8 +122,7 @@ def experiment_set(color = "default"):
         for i, w in enumerate(word_list):
             if used_index[-1] == i:
                 random_text = w
-                window["text"].update(f"{random_text}")
-                print(w) #send randomly selected word to gui
+                window["text"].update(f"{random_text}") #send randomly selected word to gui
         
         window.read(timeout = 5)
     
