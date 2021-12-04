@@ -162,6 +162,8 @@ def experiment_set(color = "default"):
     
         time.sleep(5)
 
+    window.close()
+
 def recall_responses(color = "default"):
     if color == "default":
         color = "black"
@@ -195,7 +197,7 @@ def write_to_file(): # may be modified for encryption
 def reminder():
     layout = [[sg.Text("You have completed the experiment.")],
               [sg.Text("There is a file created with your name.")],
-              [sg.Text("Please send the file to:\nirmak.eren@gmail.com")],
+              [sg.Text("Please send the file to:\nerenirmak@std.yeditepe.edu.tr")],
               [sg.Text("For further questions, you can contact me via this e-mail.")],
               [sg.Text("Thank you for your participation.")],
               [sg.Button("OK")]]
