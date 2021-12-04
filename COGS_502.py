@@ -8,6 +8,32 @@ import pandas._libs.tslibs.base #necessary to generate working .exe file
 
 response_dict = {}
 recall_dict = {}
+acceptance = []
+
+def intro():
+    sg.theme("DarkAmber")
+
+    layout = [[sg.Text("Welcome!")],
+              [sg.Text("My name is Eren Irmak. I am student in Cognitive Sciences, MA, Yeditepe University.")],
+              [sg.Text("This program is created for free recall experiment.\nWhen you click the button, a window with Demographic questions will appear.\nPlease respond to all questions.")],
+              [sg.Text("Then, trials will begin. There will be 3 sets, and at the end of the each set,\nyou will be required to type as many words as you can without any time limit.")],
+              [sg.Text("When the trials are completed, there will be a CSV file created with your name.\nIt is necessary to send it:\nerenirmak@std.yeditepe.edu.tr")],
+              [sg.Text("Your data will be protected and will not be used in any other way.\nThis experiment is conducted under the supervision of Assoc. Prof. Funda Yıldırım Cengiz.\nIf you have any questions, you can reach out to me via my e-mail.")],
+              [sg.Text("If you accept participating in the study, please type YES into the box.")],
+              [sg.InputText()],
+              [sg.Button("OK")]]
+
+    window = sg.Window("Introduction", layout, finalize = True)
+
+    while True:
+        event, value = window.read()
+
+        if value != None:
+            acceptance.append(value[0])
+        if event in (sg.WIN_CLOSED, "OK"):
+            break
+                
+    window.close()
 
 def demographics():
     sg.theme("DarkAmber")
@@ -182,7 +208,10 @@ def reminder():
 
     window.close()
 
-demographics()
+intro()
+acceptance.append(0)
+if acceptance[0] == "YES":
+    demographics()
 
 #if demographics not completed, don't start the experiment
 if response_dict != {}:
