@@ -166,6 +166,22 @@ def write_to_file(): # may be modified for encryption
     df2 = pd.concat([df, pd.DataFrame([recall_dict])], axis = 1)
     df2.to_csv("{name}.csv".format(name = response_dict["Name"]), index=False) # , compression = "zip"
 
+def reminder():
+    layout = [[sg.Text("You have completed the experiment.")],
+              [sg.Text("There is a file created with your name.")],
+              [sg.Text("Please send the file to:\nirmak.eren@gmail.com")],
+              [sg.Text("For further questions, you can contact me via this e-mail.")],
+              [sg.Text("Thank you for your participation.")],
+              [sg.Button("OK")]]
+    window = sg.Window("Reminder", layout, finalize = True)
+
+    while True:
+        event, values = window.read()
+        if event in (sg.WIN_CLOSED, "OK"):
+            break
+
+    window.close()
+
 demographics()
 
 #if demographics not completed, don't start the experiment
@@ -180,3 +196,5 @@ if response_dict != {}:
     recall_responses("red")
     
     write_to_file()
+
+    reminder()
