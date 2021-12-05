@@ -3,7 +3,8 @@ import PySimpleGUI as sg
 import random
 import time
 import pandas as pd #save responses to .CSV file
-import cryptography #encrypt the .CSV file
+import pyminizip #create encrypted .Zip file
+import os
 import pandas._libs.tslibs.base #necessary to generate working .exe file
 
 response_dict = {}
@@ -17,7 +18,7 @@ def intro():
               [sg.Text("My name is Eren Irmak. I am student in Cognitive Sciences, MA, Yeditepe University.")],
               [sg.Text("This program is created for free recall experiment.\nWhen you click the button, a window with Demographic questions will appear.\nPlease respond to all questions.")],
               [sg.Text("Then, trials will begin. There will be 3 sets, and at the end of the each set,\nyou will be required to type as many words as you can without any time limit.")],
-              [sg.Text("When the trials are completed, there will be a CSV file created with your name.\nIt is necessary to send it:\nerenirmak@std.yeditepe.edu.tr")],
+              [sg.Text("When the trials are completed, there will be a ZIP file created with your name.\nIt is necessary to send it:\neren.irmak@std.yeditepe.edu.tr")],
               [sg.Text("Your data will be protected and will not be used in any other way.\nThis experiment is conducted under the supervision of Assoc. Prof. Funda Yıldırım Cengiz.\nIf you have any questions, you can reach out to me via my e-mail.")],
               [sg.Text("If you accept participating in the study, please type YES into the box.")],
               [sg.InputText()],
@@ -85,7 +86,7 @@ def get_values(values):
     
     response_dict["Name"] = values[0]
     response_dict["Last Name"] = values[1]
-    response_dict["Age"] = int(values[2])
+    response_dict["Age"] = values[2]
     
     if values[3] == True:
         response_dict["Gender"] = "Male"
@@ -120,7 +121,7 @@ def get_values(values):
     elif values[16] == True:
         response_dict["English Classes"] = "No"
 
-    response_dict["Computer (hour/day)"] = float(values[17])
+    response_dict["Computer (hour/day)"] = values[17]
 
     if values[18] == True:
         response_dict["Eye Problem"] = "Yes"
@@ -177,10 +178,14 @@ def recall_responses(color = "default"):
     window = sg.Window("Answers", layout, finalize = True)
     while True:
         event, values = window.read()
-        if event == "Save Answers":
+
+        if values[0] == "":
+            sg.Popup("You haven't type any words.", title = "Info")        
+        elif event == "Save Answers":
             sg.Popup("Your answers are saved.", title = "Info")
             recall_values(color, values)
             break
+        
         if event == sg.WIN_CLOSED:
             break
 
@@ -192,12 +197,13 @@ def recall_values(color, values):
 def write_to_file(): # may be modified for encryption
     df = pd.DataFrame([response_dict])
     df2 = pd.concat([df, pd.DataFrame([recall_dict])], axis = 1)
-    df2.to_csv("{name}.csv".format(name = response_dict["Name"]), index=False) # , compression = "zip"
+    df2.to_csv("{name}.csv".format(name = response_dict["Name"]), encoding = "utf-8", index=False)
+
 
 def reminder():
     layout = [[sg.Text("You have completed the experiment.")],
               [sg.Text("There is a file created with your name.")],
-              [sg.Text("Please send the file to:\nerenirmak@std.yeditepe.edu.tr")],
+              [sg.Text("Please send the file to:\neren.irmak@std.yeditepe.edu.tr")],
               [sg.Text("For further questions, you can contact me via this e-mail.")],
               [sg.Text("Thank you for your participation.")],
               [sg.Button("OK")]]
@@ -210,22 +216,36 @@ def reminder():
 
     window.close()
 
+def security_measurements():
+    #Compress and Encrypt
+    file = "./{name}.csv".format(name = response_dict["Name"])
+    pre = None
+    output = "./{name}.zip".format(name = response_dict["Name"])
+    password = "do not touch!"
+    com_lvl = 5
+    pyminizip.compress(file, None, output, password, com_lvl)
+
+    os.remove("{name}.csv".format(name = response_dict["Name"]))
+
+
+
 intro()
 acceptance.append(0)
 if acceptance[0] == "YES":
     demographics()
 
 #if demographics not completed, don't start the experiment
-if response_dict != {}:
+if response_dict != {} and os.path.exists("{name}.zip".format(name = response_dict["Name"])) == False:
     experiment_set()
     recall_responses()
     
     experiment_set("green")
     recall_responses("green")
-    
+
     experiment_set("red")
     recall_responses("red")
     
     write_to_file()
+    security_measurements()
 
     reminder()
